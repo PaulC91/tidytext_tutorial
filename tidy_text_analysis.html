@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="true" />
+
+<title>Tidy Text Analysis</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+<link rel="stylesheet" href="www/styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-introduction" class="section level2">
+<h2>Introduction</h2>
+<p>One of the many great new packages to grace the R’s ecosystem in the last few years has been <code>tidytext</code> by Julia Silge &amp; David Robinson. It has allowed R users familiar with the <code>tidyverse</code> suite of packages to apply these ‘tidy tools’ to text data.</p>
+<p>If you’re not currently an R <code>tidyverse</code> user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a ‘tidy’ data analysis pipeline and how to intregate natural language data into this workflow using the tools provided by <code>tidytext</code>. It will also touch on using the <code>ggplot2</code> package to visualise the results of your analysis</p>
+<div id="section-key-concept-the-pipe" class="section level3">
+<h3>Key concept: the pipe <code>%&gt;%</code></h3>
+<p>In R, we can use the <code>%&gt;%</code> operater to ‘pipe’ data from one function to another. Most function in the <code>tidyverse</code> take a data frame as the first input and send a modified version of that data frame as the ouput. The pipe does the job of taking the output of one function and sending into the first input of the next function.</p>
+<p>This means we can write code like the below, that starts with a data frame and ‘pipes’ it along a series of functions, each one recieving the output of the function above it, until we get the data into the shape we need it.</p>
+<p>It also allows you to write very readible code that can be read like a sentence with the pipe linking the pieces of the story together with a “and then…” conjunctive.</p>
+<pre class="r"><code>data_set %&gt;% 
+  do_this_thing() %&gt;% 
+  now_this_thing() %&gt;% 
+  one_last_thing()</code></pre>
+</div>
+</div>
+<div id="section-our-test-data" class="section level2">
+<h2>Our Test Data</h2>
+<p>We have a data frame loaded in our environment with the entire text of all Harry Potter books.</p>
+<p>Run the code chunk below to inspect it…</p>
+<div class="tutorial-exercise" data-label="hp" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_text</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+</div>
+<div id="section-step-1-tidying-up" class="section level2">
+<h2>Step 1: Tidying Up</h2>
+<div id="section-unnest_tokens" class="section level3">
+<h3><code>unnest_tokens()</code></h3>
+<p>Each row of our data contains the <em>entire</em> text for each chapter of each book. But to analyse this data using the tools we have learned so far, we need to reduce each row down to a more meaningful unit of text, know as a <strong>token</strong>.</p>
+<p>When we talk about ‘tidy text data’ we are referring to a table with <strong>one-token-per-row</strong>. In this case, we are going to define a token as a single word. We can then perform various forms of text analysis on a row-by-row basis and derive some insight from each token of text.</p>
+<p>Luckily, there is a single function from the <code>tidytext</code> package that will perform this laborious task for us called <code>unnest_tokens()</code>. Fill in the blank below with the function name to see how it transforms the Harry Potter data set.</p>
+<p>The <code>output</code> argument is name of the new column that is going to be created. Since we’re unnesting down to a single word, let’s call that <code>word</code>.</p>
+<p>The <code>input</code> argument is the name of the column in the current data set that contains the text. In our case that is <code>text</code>.</p>
+<div class="tutorial-exercise" data-label="hp-unnest" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_text %&gt;% 
+  ___(output = ___, input = ___) </code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-unnest-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_text %&gt;% 
+  unnest_tokens(output = word, input = text)</code></pre>
+</div>
+</div>
+<div id="section-what-did-unnest_tokens-do" class="section level3">
+<h3>What did <code>unnest_tokens()</code> do?</h3>
+<ul>
+<li>Other columns have been retained</li>
+<li>Punctuation has been stripped</li>
+<li>Words have been converted to lower-case</li>
+</ul>
+</div>
+</div>
+<div id="section-step-2-filtering-out-stop-words" class="section level2">
+<h2>Step 2: filtering out ‘stop words’</h2>
+<p>Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr.</p>
+<p>Often in text analysis, we will want to remove stop words; stop words are words that are not useful for an analysis, typically extremely common words such as “the”, “of”, “to”, and so forth in English.</p>
+<p>We can remove stop words (kept in the <code>tidytext</code> dataset <code>stop_words</code>) with an <code>anti_join()</code>.</p>
+<p>The <code>stop_words</code> data set looks like this…</p>
+<pre class="r"><code>stop_words</code></pre>
+<pre><code>## # A tibble: 1,149 x 2
+##    word        lexicon
+##    &lt;chr&gt;       &lt;chr&gt;  
+##  1 a           SMART  
+##  2 a&#39;s         SMART  
+##  3 able        SMART  
+##  4 about       SMART  
+##  5 above       SMART  
+##  6 according   SMART  
+##  7 accordingly SMART  
+##  8 across      SMART  
+##  9 actually    SMART  
+## 10 after       SMART  
+## # ... with 1,139 more rows</code></pre>
+<p>Fill out the blanks with the name of the function and the name of the data set containing stop words to filter out any stop words in the Harry Potter data.</p>
+<div class="tutorial-exercise" data-label="hp-anti-join" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_text %&gt;% 
+  unnest_tokens(output = word, input = text) %&gt;% 
+  ___(___, by = &quot;word&quot;)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-anti-join-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_text %&gt;% 
+  unnest_tokens(output = word, input = text) %&gt;% 
+  anti_join(stop_words, by = &quot;word&quot;)</code></pre>
+</div>
+</div>
+<div id="section-step-3-word-counts" class="section level2">
+<h2>Step 3: Word Counts</h2>
+<p>We now have our tokenized data frame with all stop-words removed saved as <code>hp_tidy</code> as below. We’re now ready to conduct some analysis on the text!</p>
+<pre class="r"><code>hp_tidy</code></pre>
+<pre><code>## # A tibble: 409,338 x 3
+##    book                    chapter word     
+##    &lt;fct&gt;                     &lt;int&gt; &lt;chr&gt;    
+##  1 The Philosopher&#39;s Stone       1 boy      
+##  2 The Philosopher&#39;s Stone       1 lived    
+##  3 The Philosopher&#39;s Stone       1 dursley  
+##  4 The Philosopher&#39;s Stone       1 privet   
+##  5 The Philosopher&#39;s Stone       1 drive    
+##  6 The Philosopher&#39;s Stone       1 proud    
+##  7 The Philosopher&#39;s Stone       1 perfectly
+##  8 The Philosopher&#39;s Stone       1 normal   
+##  9 The Philosopher&#39;s Stone       1 people   
+## 10 The Philosopher&#39;s Stone       1 expect   
+## # ... with 409,328 more rows</code></pre>
+<div id="section-word-counts" class="section level3">
+<h3>Word Counts</h3>
+<p>Use the <code>count()</code> function passing the <code>word</code> column as the first argument to count the occurances of each unique word in the data. Add a <code>sort = TRUE</code> argument to bring the most common words to the top.</p>
+<div class="tutorial-exercise" data-label="hp-count" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  count(___, sort = ___)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-count-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  count(word, sort = TRUE)</code></pre>
+</div>
+</div>
+<div id="section-word-count-by-book" class="section level3">
+<h3>Word Count by Book</h3>
+<p>To get word counts on a by-book basis, we can simply add the <code>book</code> column name to the <code>count()</code> function…</p>
+<div class="tutorial-exercise" data-label="hp-count-book" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  count(___, word, sort = TRUE)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-count-book-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  count(book, word, sort = TRUE)</code></pre>
+</div>
+</div>
+<div id="section-counts-minus-names" class="section level3">
+<h3>Counts minus names</h3>
+<p>In this case, character names dominate the top word counts. If we wanted to get a look a top words that are not some of the most popular names in the books.</p>
+<p>To do this you would create a character vector of the names you would like to remove like the below.</p>
+<pre class="r"><code>hp_characters</code></pre>
+<pre><code>##  [1] &quot;harry&quot;          &quot;potter&quot;         &quot;dumbledore&quot;     &quot;voldemort&quot;     
+##  [5] &quot;snape&quot;          &quot;sirius&quot;         &quot;hermione&quot;       &quot;ron&quot;           
+##  [9] &quot;weasley&quot;        &quot;draco&quot;          &quot;malfoy&quot;         &quot;hagrid&quot;        
+## [13] &quot;neville&quot;        &quot;dobby&quot;          &quot;moody&quot;          &quot;lupin&quot;         
+## [17] &quot;bellatrix&quot;      &quot;mcgonagall&quot;     &quot;newt scamander&quot; &quot;grindelwald&quot;   
+## [21] &quot;tina&quot;           &quot;queenie&quot;        &quot;jacob&quot;          &quot;harry&#39;s&quot;       
+## [25] &quot;ginny&quot;          &quot;george&quot;</code></pre>
+<p>Then use a <code>filter</code> function to filter out words from the data that are in the <code>hp_characters</code> vector.</p>
+<p><strong>Hint:</strong> use a <code>!</code> before the column name you are filtering to <code>filter</code> to only <code>word</code>s that are not <code>%in%</code> the vector you are using to filter by.</p>
+<div class="tutorial-exercise" data-label="hp-count-no-names" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  ___(___ %in% ___) %&gt;% 
+  count(word, sort = TRUE)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-count-no-names-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  filter(!word %in% hp_characters) %&gt;% 
+  count(word, sort = TRUE)</code></pre>
+</div>
+</div>
+</div>
+<div id="section-step-4-sentiment-analysis" class="section level2">
+<h2>Step 4: Sentiment Analysis</h2>
+<div id="section-sentiment-lexicons" class="section level3">
+<h3>Sentiment Lexicons</h3>
+<p>The <code>tidytext</code> package comes with 3 built-in sentiment lexicons: AFINN, Bing and NRC.</p>
+<p>How does each lexicon differ in their measurement of sentiment?</p>
+<pre class="r"><code>get_sentiments(&quot;afinn&quot;)</code></pre>
+<pre><code>## Warning: package &#39;bindrcpp&#39; was built under R version 3.4.4</code></pre>
+<pre><code>## # A tibble: 2,476 x 2
+##    word       score
+##    &lt;chr&gt;      &lt;int&gt;
+##  1 abandon       -2
+##  2 abandoned     -2
+##  3 abandons      -2
+##  4 abducted      -2
+##  5 abduction     -2
+##  6 abductions    -2
+##  7 abhor         -3
+##  8 abhorred      -3
+##  9 abhorrent     -3
+## 10 abhors        -3
+## # ... with 2,466 more rows</code></pre>
+<pre class="r"><code>get_sentiments(&quot;bing&quot;)</code></pre>
+<pre><code>## # A tibble: 6,788 x 2
+##    word        sentiment
+##    &lt;chr&gt;       &lt;chr&gt;    
+##  1 2-faced     negative 
+##  2 2-faces     negative 
+##  3 a+          positive 
+##  4 abnormal    negative 
+##  5 abolish     negative 
+##  6 abominable  negative 
+##  7 abominably  negative 
+##  8 abominate   negative 
+##  9 abomination negative 
+## 10 abort       negative 
+## # ... with 6,778 more rows</code></pre>
+<pre class="r"><code>get_sentiments(&quot;nrc&quot;)</code></pre>
+<pre><code>## # A tibble: 13,901 x 2
+##    word        sentiment
+##    &lt;chr&gt;       &lt;chr&gt;    
+##  1 abacus      trust    
+##  2 abandon     fear     
+##  3 abandon     negative 
+##  4 abandon     sadness  
+##  5 abandoned   anger    
+##  6 abandoned   fear     
+##  7 abandoned   negative 
+##  8 abandoned   sadness  
+##  9 abandonment anger    
+## 10 abandonment fear     
+## # ... with 13,891 more rows</code></pre>
+</div>
+<div id="section-sentiment-analysis-using-inner_join" class="section level3">
+<h3>Sentiment analysis using <code>inner_join()</code></h3>
+<p>With data in a tidy format, sentiment analysis can be done as an inner join. This is another of the great successes of viewing text mining as a tidy data analysis task; much as removing stop words is an anti-join operation, performing sentiment analysis is an inner-join operation.</p>
+<p>Inner-joining a lexicon to our data will reduce the data to only words that have a match in the lexicon and then join on the the sentiment column to the data set.</p>
+<p>Use <code>inner_join</code> in the code chunk below to join the <code>bing</code> sentiment lexicon to our data.</p>
+<div class="tutorial-exercise" data-label="hp-inner-join-bing" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  ___(get_sentiments(&quot;___&quot;))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"100%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-inner-join-bing-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;))</code></pre>
+</div>
+</div>
+<div id="section-calculate-proportion-of-positivenegative-words-in-each-book" class="section level3">
+<h3>Calculate proportion of positive/negative words in each book</h3>
+<p>Once we have joined the positive/negative sentiments from the bing lexicon to our data, we can use <code>group_by()</code>, <code>summarise()</code> and <code>mutate()</code> to calculate the proportions in each book.</p>
+<ul>
+<li>First group the data by the <code>book</code> and <code>sentiment</code> columns</li>
+<li>Then use the <code>n()</code> function with summarise to count the occurances of each group</li>
+<li>Finally we use <code>n / sum(n)</code> with <code>mutate()</code> to get the proportions and then <code>ungroup()</code></li>
+</ul>
+<div class="tutorial-exercise" data-label="hp-sent-props" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  group_by(___, ___) %&gt;% 
+  summarise(n = ___) %&gt;% 
+  mutate(prop = n / sum(n)) %&gt;% 
+  ungroup()</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-sent-props-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  group_by(book, sentiment) %&gt;% 
+  summarise(n = n()) %&gt;% 
+  mutate(prop = n / sum(n)) %&gt;% 
+  ungroup()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="prepare-hp-sent-props-viz" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_props &lt;- hp_tidy %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  group_by(book, sentiment) %&gt;% 
+  summarise(n = n()) %&gt;% 
+  mutate(prop = n / sum(n)) %&gt;% 
+  ungroup()</code></pre>
+</div>
+</div>
+<div id="section-visualise-the-results-with-ggplot2" class="section level3">
+<h3>Visualise the results with <code>ggplot2</code>!</h3>
+<p>Once we’ve done some analysis, it’s good idea to visualise the results in a chart. We can use the <code>ggplot2</code> package from the tidyverse to do this.</p>
+<p>We won’t have time to cover ggplot2 at great length today but it’s widely regarded as the best chart programming library in the world with near endless visualisation options made possible by the possibility of iteratively adding layers of data.</p>
+<p>Combining visualisation and your data wrangling/analysis into a single scripted process is also a very powerful concept that can save you a lot of time by eliminating the need to export your data into another visualisation tool.</p>
+<p>Below is a basic ggplot setup. Note that each line is linked with a <code>+</code> rather than a <code>%&gt;%</code>.</p>
+<p>The initial <code>ggplot()</code> function takes a data argument as well as an aesthetics function <code>aes()</code> in which you map columns of your data to coordinates, shapes or colours on the chart.</p>
+<p>In this instance, we then add a <code>geom_col</code> with position set to stack (stacked-bar chart), flip the axis to make the book names more readable then add a title to the chart.</p>
+<p>Fill in the blanks to put the <code>book</code> column on the x-axis, <code>prop</code> column on the y-axis and map the <code>sentiment</code> colour to the colour <code>fill</code>. Finally give your chart an appropriate title and run the code to see what we get!</p>
+<div class="tutorial-exercise" data-label="hp-sent-props-viz" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>ggplot(data = hp_props, aes(x = ___, y = ___, fill = ___)) +
+  geom_col(position = &quot;stack&quot;) +
+  coord_flip() +
+  labs(title = &quot;Give your chart a title here!&quot;, x = NULL, y = NULL)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.setup":"prepare-hp-sent-props-viz","exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-sent-props-viz-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>ggplot(data = hp_props, aes(x = book, y = prop, fill = sentiment)) +
+  geom_col(position = &quot;stack&quot;) +
+  coord_flip() +
+  labs(title = &quot;Proportion of sentiment in Harry Potter books&quot;, x = NULL, y = NULL)</code></pre>
+</div>
+</div>
+<div id="section-challenge" class="section level3">
+<h3>Challenge</h3>
+<p>Starting with the <code>hp_tidy</code> data set. Can you:</p>
+<ol style="list-style-type: decimal">
+<li><code>inner_join()</code> the AFINN sentiment lexicon (<code>get_sentiments(&quot;afinn&quot;)</code>)</li>
+<li>Calculate the sentiment <code>score</code> of each chapter in each book</li>
+</ol>
+<div class="tutorial-exercise" data-label="hp-sent-affin" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% </code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-sent-affin-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_tidy %&gt;% 
+  inner_join(get_sentiments(&quot;afinn&quot;)) %&gt;% 
+  group_by(book, chapter) %&gt;% 
+  summarise(score = sum(score)) %&gt;% 
+  ungroup()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="prepare-hp-scores-viz" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>hp_scores &lt;- hp_tidy %&gt;% 
+  inner_join(get_sentiments(&quot;afinn&quot;)) %&gt;% 
+  group_by(book, chapter) %&gt;% 
+  summarise(score = sum(score)) %&gt;% 
+  ungroup()</code></pre>
+</div>
+</div>
+<div id="section-visualise-the-results" class="section level3">
+<h3>Visualise the results!</h3>
+<p>For this chart, lets show the computed scores over time (chapters) and create a separate chart for each book by using supplying the <code>book</code> column to the <code>facet_wrap()</code> function.</p>
+<div class="tutorial-exercise" data-label="hp-scores-viz" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>ggplot(data = hp_scores, aes(x = ___, y = ___, fill = ___ &gt; 0)) +
+  facet_wrap(~___, ncol = 1) +
+  geom_col(show.legend = FALSE) +
+  labs(title = &quot;Add your title here...&quot;, x = &quot;___&quot;, y = &quot;___&quot;)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":10,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":true,"error":false,"message":true,"exercise.df_print":"default","exercise.timelimit":60,"exercise.setup":"prepare-hp-scores-viz","exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="hp-scores-viz-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>ggplot(data = hp_scores, aes(x = chapter, y = score, fill = score &gt; 0)) +
+  facet_wrap(~book, ncol = 2) +
+  geom_col(show.legend = FALSE) +
+  geom_hline(yintercept = 0, colour = &quot;black&quot;) +
+  labs(title = &quot;Sentiment score by chapter&quot;, x = &quot;Chapter&quot;, y = &quot;Sentiment Score&quot;)</code></pre>
+</div>
+<p>After you have a chart, try modifying some of the elements…</p>
+<ul>
+<li>What does changing the <code>ncol =</code> argument in the <code>facet_wrap</code> function do?</li>
+<li>Add a <code>scales = &quot;free_x&quot;</code> argument inside <code>facet_wrap()</code>. What has changed?</li>
+<li>Try adding another line (remember to use the <code>+</code>) to use a different chart theme… <code>theme_light()</code> perhaps?</li>
+</ul>
+</div>
+</div>
+<div id="section-summary" class="section level2">
+<h2>Summary</h2>
+<p>A typical tidy text analysis with R…</p>
+<pre class="r"><code># your data set with a text column
+sent_analysis &lt;- text_data %&gt;% 
+  # tidy, remove stop words, join setntiments
+  unnest_tokens(word, text) %&gt;% 
+  anti_join(stop_words) %&gt;% 
+  inner_join(get_sentiments(&quot;...&quot;)) %&gt;% 
+  # do some analysis
+  group_by(...) %&gt;% 
+  summarise(...) %&gt;% 
+  mutate(...) %&gt;% 
+  ungroup()
+
+# visualise your results
+ggplot(sent_analysis, aes(...)) +
+  geom_*() +
+  labs(title = &quot;...&quot;)</code></pre>
+<p>Next up we’re going to switch over to RStudio where we can go through all the steps of performing a text analysis of our own…</p>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(tidytext)
+library(feather)
+
+checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
+  list(message = check_code, correct = TRUE, location = "append")
+}
+
+tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
+
+knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center")
+
+hp_text <- read_feather("hp_text.feather")
+
+data(stop_words)
+
+hp_tidy <- hp_text %>% 
+  unnest_tokens(output = word, input = text) %>% 
+  anti_join(stop_words, by = "word")
+
+hp_characters <- c("Harry",
+                   "Potter",
+                   "Dumbledore",
+                   "Voldemort",
+                   "Snape",
+                   "Sirius",
+                   "Hermione",
+                   "Ron",
+                   "Weasley",
+                   "Draco",
+                   "Malfoy",
+                   "Hagrid",
+                   "Neville",
+                   "Dobby",
+                   "Moody",
+                   "Lupin",
+                   "Bellatrix",
+                   "McGonagall",
+                   "Newt Scamander",
+                   "Grindelwald",
+                   "Tina",
+                   "Queenie",
+                   "Jacob",
+                   "Harry's",
+                   "Ginny",
+                   "George") %>% str_to_lower()
+
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-code-editor`)), session)
+output$`tutorial-exercise-hp-output` <- renderUI({
+  `tutorial-exercise-hp-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-unnest-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-unnest-code-editor`)), session)
+output$`tutorial-exercise-hp-unnest-output` <- renderUI({
+  `tutorial-exercise-hp-unnest-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-anti-join-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-anti-join-code-editor`)), session)
+output$`tutorial-exercise-hp-anti-join-output` <- renderUI({
+  `tutorial-exercise-hp-anti-join-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-count-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-count-code-editor`)), session)
+output$`tutorial-exercise-hp-count-output` <- renderUI({
+  `tutorial-exercise-hp-count-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-count-book-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-count-book-code-editor`)), session)
+output$`tutorial-exercise-hp-count-book-output` <- renderUI({
+  `tutorial-exercise-hp-count-book-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-count-no-names-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-count-no-names-code-editor`)), session)
+output$`tutorial-exercise-hp-count-no-names-output` <- renderUI({
+  `tutorial-exercise-hp-count-no-names-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-inner-join-bing-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-inner-join-bing-code-editor`)), session)
+output$`tutorial-exercise-hp-inner-join-bing-output` <- renderUI({
+  `tutorial-exercise-hp-inner-join-bing-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-sent-props-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-sent-props-code-editor`)), session)
+output$`tutorial-exercise-hp-sent-props-output` <- renderUI({
+  `tutorial-exercise-hp-sent-props-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-sent-props-viz-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-sent-props-viz-code-editor`)), session)
+output$`tutorial-exercise-hp-sent-props-viz-output` <- renderUI({
+  `tutorial-exercise-hp-sent-props-viz-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-sent-affin-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-sent-affin-code-editor`)), session)
+output$`tutorial-exercise-hp-sent-affin-output` <- renderUI({
+  `tutorial-exercise-hp-sent-affin-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-hp-scores-viz-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-hp-scores-viz-code-editor`)), session)
+output$`tutorial-exercise-hp-scores-viz-output` <- renderUI({
+  `tutorial-exercise-hp-scores-viz-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap-3.3.5"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.0.13"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/fontawesome-all.min.js","js/fa-v4-shims.min.js"]},{"type":"character","attributes":{},"value":["css/fa-svg-with-js.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["localforage"]},{"type":"character","attributes":{},"value":["1.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/localforage"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["localforage.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Tidy Text Analysis</h2>
+<h3 class="subtitle"><em><a href="https://cultureofinsight.com/">Culture of Insight</a></em></h3>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+
+</html>

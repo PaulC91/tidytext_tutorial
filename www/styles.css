@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css?family=Oswald|Roboto+Slab');
+
+body {
+  font-family: 'Roboto Slab', 'Source Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Oswald, sans-serif;
+}
+
+code {
+  color: #c7254e;
+}
+
+.pagedtable {
+  font-family: 'Source Sans', sans-serif;
+}

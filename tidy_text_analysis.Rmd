@@ -1,0 +1,419 @@
+---
+title: "Tidy Text Analysis"
+subtitle: "[Culture of Insight](https://cultureofinsight.com/)"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: default
+    css: "www/styles.css"
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(tidytext)
+library(feather)
+
+checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
+  list(message = check_code, correct = TRUE, location = "append")
+}
+
+tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
+
+knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center")
+
+hp_text <- read_feather("hp_text.feather")
+
+data(stop_words)
+
+hp_tidy <- hp_text %>% 
+  unnest_tokens(output = word, input = text) %>% 
+  anti_join(stop_words, by = "word")
+
+hp_characters <- c("Harry",
+                   "Potter",
+                   "Dumbledore",
+                   "Voldemort",
+                   "Snape",
+                   "Sirius",
+                   "Hermione",
+                   "Ron",
+                   "Weasley",
+                   "Draco",
+                   "Malfoy",
+                   "Hagrid",
+                   "Neville",
+                   "Dobby",
+                   "Moody",
+                   "Lupin",
+                   "Bellatrix",
+                   "McGonagall",
+                   "Newt Scamander",
+                   "Grindelwald",
+                   "Tina",
+                   "Queenie",
+                   "Jacob",
+                   "Harry's",
+                   "Ginny",
+                   "George") %>% str_to_lower()
+
+```
+
+
+## Introduction
+
+One of the many great new packages to grace the R ecosystem in the last few years has been `tidytext` by Julia Silge & David Robinson. It has allowed R users familiar with the `tidyverse` suite of packages to apply these 'tidy tools' to text data.
+
+If you're not currently an R `tidyverse` user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a 'tidy' data analysis pipeline and how to intregate natural language data into this workflow using the tools provided by `tidytext`. It will also touch on using the `ggplot2` package to visualise the results of your analysis
+
+### Key concept: the pipe `%>%`
+
+In R, we can use the `%>%` operater to 'pipe' data from one function to another. Most functions in the `tidyverse` take a data frame as the first input and send out a modified version of that data frame as the ouput. The pipe does the job of taking the output of one function and sending into the first input of the next function.
+
+This means we can write code like the below, that starts with a data frame and 'pipes' it along a series of functions, each one recieving the output of the function above it, until we get the data into the shape we need it.
+
+It also allows you to write very readible code that can be read like a sentence with the pipe linking the pieces of the story together with a "and then..." conjunctive.
+
+```{r echo=TRUE, eval=FALSE}
+data_set %>% 
+  do_this_thing() %>% 
+  now_this_thing() %>% 
+  one_last_thing()
+```
+
+
+## Our Test Data
+
+We have a data frame loaded in our environment with the entire text of all Harry Potter books.
+
+Run the code chunk below to inspect it...
+
+```{r hp, exercise=TRUE, exercise.eval=FALSE}
+hp_text
+```
+
+## Step 1: Tidying Up
+
+### `unnest_tokens()`
+
+Each row of our data contains the _entire_ text for each chapter of each book. But to analyse this data using the tools we have learned so far, we need to reduce each row down to a more meaningful unit of text, know as a **token**.
+
+When we talk about 'tidy text data' we are referring to a table with **one-token-per-row**. In this case, we are going to define a token as a single word. We can then perform various forms of text analysis on a row-by-row basis and derive some insight from each token of text.
+
+Luckily, there is a single function from the `tidytext` package that will perform this laborious task for us called `unnest_tokens()`. Fill in the blank below with the function name to see how it transforms the Harry Potter data set.
+
+The `output` argument is name of the new column that is going to be created. Since we're unnesting down to a single word, let's call that `word`.
+
+The `input` argument is the name of the column in the current data set that contains the text. In our case that is `text`.
+
+```{r hp-unnest, exercise=TRUE}
+hp_text %>% 
+  ___(output = ___, input = ___) 
+  
+```
+
+
+
+```{r hp-unnest-solution}
+hp_text %>% 
+  unnest_tokens(output = word, input = text)
+```
+
+### What did `unnest_tokens()` do?
+
+- Other columns have been retained
+- Punctuation has been stripped
+- Words have been converted to lower-case
+
+## Step 2: filtering out 'stop words'
+
+Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr. 
+
+Often in text analysis, we will want to remove stop words; stop words are words that are not useful for an analysis, typically extremely common words such as “the”, “of”, “to”, and so forth in English. 
+
+We can remove stop words (kept in the `tidytext` dataset `stop_words`) with an `anti_join()`.
+
+The `stop_words` data set looks like this...
+
+```{r, echo=TRUE}
+stop_words
+```
+
+
+Fill out the blanks with the name of the function and the name of the data set containing stop words to filter out any stop words in the Harry Potter data.
+
+```{r hp-anti-join, exercise=TRUE}
+hp_text %>% 
+  unnest_tokens(output = word, input = text) %>% 
+  ___(___, by = "word")
+  
+```
+
+```{r hp-anti-join-solution}
+hp_text %>% 
+  unnest_tokens(output = word, input = text) %>% 
+  anti_join(stop_words, by = "word")
+  
+```
+
+
+## Step 3: Word Counts
+
+We now have our tokenized data frame with all stop-words removed saved as `hp_tidy` as below. We're now ready to conduct some analysis on the text!
+
+```{r echo=TRUE}
+hp_tidy
+  
+```
+
+### Word Counts
+
+Use the `count()` function passing the `word` column as the first argument to count the occurances of each unique word in the data. Add a `sort = TRUE` argument to bring the most common words to the top.
+
+
+```{r hp-count, exercise=TRUE}
+hp_tidy %>% 
+  count(___, sort = ___)
+  
+```
+
+```{r hp-count-solution}
+hp_tidy %>% 
+  count(word, sort = TRUE)
+  
+```
+
+### Word Count by Book
+
+To get word counts on a by-book basis, we can simply add the `book` column name to the `count()` function...
+
+```{r hp-count-book, exercise=TRUE}
+hp_tidy %>% 
+  count(___, word, sort = TRUE)
+  
+```
+
+```{r hp-count-book-solution}
+hp_tidy %>% 
+  count(book, word, sort = TRUE)
+
+```
+
+### Counts minus names
+
+In this case, character names dominate the top word counts. If we wanted to get a look a top words that are not some of the most popular names in the books.
+
+To do this you would create a character vector of the names you would like to remove like the below.
+
+```{r echo=TRUE}
+hp_characters
+```
+
+Then use a `filter` function to filter out words from the data that are in the `hp_characters` vector.
+
+**Hint:** use a `!` before the column name you are filtering to `filter` to only `word`s that are not `%in%` the vector you are using to filter by.
+
+```{r hp-count-no-names, exercise=TRUE}
+hp_tidy %>% 
+  ___(___ %in% ___) %>% 
+  count(word, sort = TRUE)
+  
+```
+
+```{r hp-count-no-names-solution}
+hp_tidy %>% 
+  filter(!word %in% hp_characters) %>% 
+  count(word, sort = TRUE)
+
+```
+
+## Step 4: Sentiment Analysis
+
+### Sentiment Lexicons
+
+The `tidytext` package comes with 3 built-in sentiment lexicons: AFINN, Bing and NRC.
+
+How does each lexicon differ in their measurement of sentiment?
+
+```{r echo=TRUE}
+get_sentiments("afinn")
+```
+
+```{r echo=TRUE}
+get_sentiments("bing")
+```
+
+```{r echo=TRUE}
+get_sentiments("nrc")
+```
+
+
+### Sentiment analysis using `inner_join()`
+
+With data in a tidy format, sentiment analysis can be done as an inner join. This is another of the great successes of viewing text mining as a tidy data analysis task; much as removing stop words is an anti-join operation, performing sentiment analysis is an inner-join operation.
+
+Inner-joining a lexicon to our data will reduce the data to only words that have a match in the lexicon and then join on the the sentiment column to the data set.
+
+Use `inner_join` in the code chunk below to join the `bing` sentiment lexicon to our data.
+
+```{r hp-inner-join-bing, exercise=TRUE, out.width="100%"}
+hp_tidy %>% 
+  ___(get_sentiments("___"))
+
+```
+
+```{r hp-inner-join-bing-solution}
+hp_tidy %>% 
+  inner_join(get_sentiments("bing"))
+  
+```
+
+### Calculate proportion of positive/negative words in each book
+
+Once we have joined the positive/negative sentiments from the bing lexicon to our data, we can use `group_by()`, `summarise()` and `mutate()` to calculate the proportions in each book.
+
+- First group the data by the `book` and `sentiment` columns
+- Then use the `n()` function with summarise to count the occurances of each group
+- Finally we use `n / sum(n)` with `mutate()` to get the proportions and then `ungroup()`
+
+```{r hp-sent-props, exercise=TRUE}
+hp_tidy %>% 
+  inner_join(get_sentiments("bing")) %>% 
+  group_by(___, ___) %>% 
+  summarise(n = ___) %>% 
+  mutate(prop = n / sum(n)) %>% 
+  ungroup()
+```
+
+```{r hp-sent-props-solution, message=FALSE, warning=FALSE}
+hp_tidy %>% 
+  inner_join(get_sentiments("bing")) %>% 
+  group_by(book, sentiment) %>% 
+  summarise(n = n()) %>% 
+  mutate(prop = n / sum(n)) %>% 
+  ungroup()
+```
+
+```{r prepare-hp-sent-props-viz, message=FALSE, warning=FALSE}
+hp_props <- hp_tidy %>% 
+  inner_join(get_sentiments("bing")) %>% 
+  group_by(book, sentiment) %>% 
+  summarise(n = n()) %>% 
+  mutate(prop = n / sum(n)) %>% 
+  ungroup()
+```
+
+### Visualise the results with `ggplot2`!
+
+Once we've done some analysis, it's good idea to visualise the results in a chart. We can use the `ggplot2` package from the tidyverse to do this.
+
+We won't have time to cover ggplot2 at great length today but it's widely regarded as the best chart programming library in the world with near endless visualisation options made possible by the possibility of iteratively adding layers of data.
+
+Combining visualisation and your data wrangling/analysis into a single scripted process is also a very powerful concept that can save you a lot of time by eliminating the need to export your data into another visualisation tool.
+
+Below is a basic ggplot setup. Note that each line is linked with a `+` rather than a `%>%`.
+
+The initial `ggplot()` function takes a data argument as well as an aesthetics function `aes()` in which you map columns of your data to coordinates, shapes or colours on the chart.
+
+In this instance, we then add a `geom_col` with position set to stack (stacked-bar chart), flip the axis to make the book names more readable then add a title to the chart.
+
+Fill in the blanks to put the `book` column on the x-axis, `prop` column on the y-axis and map the `sentiment` colour to the colour `fill`. Finally give your chart an appropriate title and run the code to see what we get!
+
+```{r hp-sent-props-viz, exercise=TRUE, exercise.setup = "prepare-hp-sent-props-viz", message=FALSE, warning=FALSE}
+ggplot(data = hp_props, aes(x = ___, y = ___, fill = ___)) +
+  geom_col(position = "stack") +
+  coord_flip() +
+  labs(title = "Give your chart a title here!", x = NULL, y = NULL)
+```
+
+```{r hp-sent-props-viz-solution}
+ggplot(data = hp_props, aes(x = book, y = prop, fill = sentiment)) +
+  geom_col(position = "stack") +
+  coord_flip() +
+  labs(title = "Proportion of sentiment in Harry Potter books", x = NULL, y = NULL)
+```
+
+### Challenge
+
+Starting with the `hp_tidy` data set. Can you:
+
+1. `inner_join()` the AFINN sentiment lexicon (`get_sentiments("afinn")`)
+2. Calculate the sentiment `score` of each chapter in each book
+
+```{r hp-sent-affin, exercise=TRUE}
+hp_tidy %>% 
+  
+```
+
+```{r hp-sent-affin-solution}
+hp_tidy %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(book, chapter) %>% 
+  summarise(score = sum(score)) %>% 
+  ungroup()
+```
+
+```{r prepare-hp-scores-viz, message=FALSE, warning=FALSE}
+hp_scores <- hp_tidy %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(book, chapter) %>% 
+  summarise(score = sum(score)) %>% 
+  ungroup()
+```
+
+### Visualise the results!
+
+For this chart, lets show the computed scores over time (chapters) and create a separate chart for each book by using supplying the `book` column to the `facet_wrap()` function.
+
+```{r hp-scores-viz, fig.height=10, exercise=TRUE, exercise.setup="prepare-hp-scores-viz"}
+ggplot(data = hp_scores, aes(x = ___, y = ___, fill = ___ > 0)) +
+  facet_wrap(~___, ncol = 1) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "Add your title here...", x = "___", y = "___")
+```
+
+```{r hp-scores-viz-solution}
+ggplot(data = hp_scores, aes(x = chapter, y = score, fill = score > 0)) +
+  facet_wrap(~book, ncol = 2) +
+  geom_col(show.legend = FALSE) +
+  geom_hline(yintercept = 0, colour = "black") +
+  labs(title = "Sentiment score by chapter", x = "Chapter", y = "Sentiment Score")
+```
+
+After you have a chart, try modifying some of the elements...
+
+- What does changing the `ncol = ` argument in the `facet_wrap` function do?
+- Add a `scales = "free_x"` argument inside `facet_wrap()`. What has changed?
+- Try adding another line (remember to use the `+`) to use a different chart theme... `theme_light()` perhaps?
+
+## Summary
+
+A typical tidy text analysis with R...
+
+```{r echo=TRUE, eval=FALSE}
+
+# your data set with a text column
+sent_analysis <- text_data %>% 
+  # tidy, remove stop words, join setntiments
+  unnest_tokens(word, text) %>% 
+  anti_join(stop_words) %>% 
+  inner_join(get_sentiments("...")) %>% 
+  # do some analysis
+  group_by(...) %>% 
+  summarise(...) %>% 
+  mutate(...) %>% 
+  ungroup()
+
+# visualise your results
+ggplot(sent_analysis, aes(...)) +
+  geom_*() +
+  labs(title = "...")
+
+```
+
+Next up we're going to switch over to RStudio where we can go through all the steps of performing a text analysis of our own...
+
