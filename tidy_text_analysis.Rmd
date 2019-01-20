@@ -24,7 +24,8 @@ checker <- function(label, user_code, check_code, envir_result, evaluate_result,
 
 tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
 
-knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center")
+knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center",
+                      max.print = 100, warning = FALSE, message = FALSE)
 
 hp_text <- read_feather("hp_text.feather")
 
@@ -52,7 +53,6 @@ hp_characters <- c("Harry",
                    "Lupin",
                    "Bellatrix",
                    "McGonagall",
-                   "Newt Scamander",
                    "Grindelwald",
                    "Tina",
                    "Queenie",
@@ -66,9 +66,13 @@ hp_characters <- c("Harry",
 
 ## Introduction
 
+### Tidy Tools
+
 One of the many great new packages to grace the R ecosystem in the last few years has been `tidytext` by Julia Silge & David Robinson. It has allowed R users familiar with the `tidyverse` suite of packages to apply these 'tidy tools' to text data.
 
-If you're not currently an R `tidyverse` user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a 'tidy' data analysis pipeline and how to intregate natural language data into this workflow using the tools provided by `tidytext`. It will also touch on using the `ggplot2` package to visualise the results of your analysis
+If you're not currently an R `tidyverse` user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a 'tidy' data analysis pipeline and how to intregate natural language data into this workflow using the tools provided by `tidytext`. It will also touch on using the `ggplot2` package to visualise the results of your analysis.
+
+So let's get cracking...
 
 ### Key concept: the pipe `%>%`
 
@@ -85,22 +89,29 @@ data_set %>%
   one_last_thing()
 ```
 
+Now to some data...
 
-## Our Test Data
+### Our Test Data
 
-We have a data frame loaded in our environment with the entire text of all Harry Potter books.
+We have a data frame named `hp_text` loaded in our environment with the entire text of all Harry Potter books!
 
-Run the code chunk below to inspect it...
+In R, simply running code with the name of a data frame will print out a sample of its contents. 
+
+So run the code chunk below to have a look at what we've got...
 
 ```{r hp, exercise=TRUE, exercise.eval=FALSE}
 hp_text
 ```
 
+Because this is a special type of data frame known as a 'tibble', we get a useful print out of the data telling us how many rows and columns we have, the type of data in each column (`<fct>`, `<int>`, `<chr>`), and a sample of the first 10 rows of data.
+
+We can see our data has `book`, `chapter`, and `text` columns. Our first task is to tidy the data to prepare it for analysis...
+
 ## Step 1: Tidying Up
 
 ### `unnest_tokens()`
 
-Each row of our data contains the _entire_ text for each chapter of each book. But to analyse this data using the tools we have learned so far, we need to reduce each row down to a more meaningful unit of text, know as a **token**.
+Each row of our data contains the _entire_ text for each chapter of each book. But to analyse this data using tidyverse tools, we need to reduce each row down to a more meaningful unit of text, know as a **token**.
 
 When we talk about 'tidy text data' we are referring to a table with **one-token-per-row**. In this case, we are going to define a token as a single word. We can then perform various forms of text analysis on a row-by-row basis and derive some insight from each token of text.
 
@@ -116,8 +127,6 @@ hp_text %>%
   
 ```
 
-
-
 ```{r hp-unnest-solution}
 hp_text %>% 
   unnest_tokens(output = word, input = text)
@@ -129,22 +138,27 @@ hp_text %>%
 - Punctuation has been stripped
 - Words have been converted to lower-case
 
+
+
 ## Step 2: filtering out 'stop words'
 
 Now that the data is in one-word-per-row format, we can manipulate it with tidy tools like dplyr. 
 
 Often in text analysis, we will want to remove stop words; stop words are words that are not useful for an analysis, typically extremely common words such as “the”, “of”, “to”, and so forth in English. 
 
-We can remove stop words (kept in the `tidytext` dataset `stop_words`) with an `anti_join()`.
-
-The `stop_words` data set looks like this...
+The `tidytext` package provides a `stop_words` data set that looks like this...
 
 ```{r, echo=TRUE}
 stop_words
 ```
 
+We can remove stop words with an `anti_join()`. This is known as a filtering join operation that works by removing any words in our data set that also appear in the stop words data set.
 
-Fill out the blanks with the name of the function and the name of the data set containing stop words to filter out any stop words in the Harry Potter data.
+```{r out.width="70%", fig.cap="animation by Garrick Aden-Buie @grrrck"}
+knitr::include_graphics("www/anti-join.gif")
+```
+
+Fill out the blanks with the name of the function and the name of the data set containing stop words to filter out any stop words in the Harry Potter data. The `by = "word"` argument tells the join function that we would like it to anti-join on the `word` column in each data set.
 
 ```{r hp-anti-join, exercise=TRUE}
 hp_text %>% 
@@ -175,7 +189,7 @@ hp_tidy
 Use the `count()` function passing the `word` column as the first argument to count the occurances of each unique word in the data. Add a `sort = TRUE` argument to bring the most common words to the top.
 
 
-```{r hp-count, exercise=TRUE}
+```{r hp-count, exercise=TRUE, rows.print=20}
 hp_tidy %>% 
   count(___, sort = ___)
   
@@ -205,7 +219,7 @@ hp_tidy %>%
 
 ### Counts minus names
 
-In this case, character names dominate the top word counts. If we wanted to get a look a top words that are not some of the most popular names in the books.
+In this case, character names dominate the top word counts. We may want to get a look a top words that are not some of the most popular names in the books.
 
 To do this you would create a character vector of the names you would like to remove like the below.
 
@@ -258,6 +272,10 @@ With data in a tidy format, sentiment analysis can be done as an inner join. Thi
 
 Inner-joining a lexicon to our data will reduce the data to only words that have a match in the lexicon and then join on the the sentiment column to the data set.
 
+```{r out.width="70%", fig.cap="animation by Garrick Aden-Buie @grrrck"}
+knitr::include_graphics("www/inner-join.gif")
+```
+
 Use `inner_join` in the code chunk below to join the `bing` sentiment lexicon to our data.
 
 ```{r hp-inner-join-bing, exercise=TRUE, out.width="100%"}
@@ -269,7 +287,7 @@ hp_tidy %>%
 ```{r hp-inner-join-bing-solution}
 hp_tidy %>% 
   inner_join(get_sentiments("bing"))
-  
+ 
 ```
 
 ### Calculate proportion of positive/negative words in each book
@@ -307,13 +325,17 @@ hp_props <- hp_tidy %>%
   ungroup()
 ```
 
-### Visualise the results with `ggplot2`!
+### Visualise the results with `ggplot2`
+
+```{r out.width="70%", fig.cap="illustration by Allison Horst @allison_horst"}
+knitr::include_graphics("https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/ggplot2_masterpiece.png")
+```
 
 Once we've done some analysis, it's good idea to visualise the results in a chart. We can use the `ggplot2` package from the tidyverse to do this.
 
-We won't have time to cover ggplot2 at great length today but it's widely regarded as the best chart programming library in the world with near endless visualisation options made possible by the possibility of iteratively adding layers of data.
+We won't have time to cover ggplot2 at great length in this tutorial, but it's widely regarded as the best chart programming library in the world with near endless visualisation options made possible by the possibility of iteratively adding layers of data.
 
-Combining visualisation and your data wrangling/analysis into a single scripted process is also a very powerful concept that can save you a lot of time by eliminating the need to export your data into another visualisation tool.
+Combining visualisation and your data wrangling/analysis into a single scripted process is also a very powerful concept that can improve the quality and reproducibility of your data reporting.
 
 Below is a basic ggplot setup. Note that each line is linked with a `+` rather than a `%>%`.
 
@@ -337,7 +359,7 @@ ggplot(data = hp_props, aes(x = book, y = prop, fill = sentiment)) +
   labs(title = "Proportion of sentiment in Harry Potter books", x = NULL, y = NULL)
 ```
 
-### Challenge
+### Challenge!
 
 Starting with the `hp_tidy` data set. Can you:
 
@@ -365,9 +387,13 @@ hp_scores <- hp_tidy %>%
   ungroup()
 ```
 
-### Visualise the results!
+### Visualise the results
 
-For this chart, lets show the computed scores over time (chapters) and create a separate chart for each book by using supplying the `book` column to the `facet_wrap()` function.
+The sentiment score by chapter data frame you (hopefully) just built is now saved in the environment as `hp_scores`. Let's chart it!
+
+
+
+For this chart, lets show the computed `score`s over time (`chapter`s) and create a separate chart for each book by supplying the `book` column to the `facet_wrap()` function. We can also colour the bars differently depending on whether is `score` is greater than 0 or not.
 
 ```{r hp-scores-viz, fig.height=10, exercise=TRUE, exercise.setup="prepare-hp-scores-viz"}
 ggplot(data = hp_scores, aes(x = ___, y = ___, fill = ___ > 0)) +
@@ -392,16 +418,23 @@ After you have a chart, try modifying some of the elements...
 
 ## Summary
 
-A typical tidy text analysis with R...
+So that was brief introduction to tackling text analysis the _tidy_ way using the `tidyverse` and `tidytext` packages.
+
+When applying these techniques yourself you will start to find many analyses follow a similar pattern...
 
 ```{r echo=TRUE, eval=FALSE}
+# load the packages
+library(tidyverse)
+library(tidytext)
 
 # your data set with a text column
 sent_analysis <- text_data %>% 
+  
   # tidy, remove stop words, join setntiments
   unnest_tokens(word, text) %>% 
   anti_join(stop_words) %>% 
   inner_join(get_sentiments("...")) %>% 
+  
   # do some analysis
   group_by(...) %>% 
   summarise(...) %>% 
@@ -415,5 +448,20 @@ ggplot(sent_analysis, aes(...)) +
 
 ```
 
-Next up we're going to switch over to RStudio where we can go through all the steps of performing a text analysis of our own...
+### Further Resources
+
+But of course, we have only scratched the surface here. To learn more I would highly recommend diving head first into the following 2 _free_ textbooks:
+
+- [R for Data Science](https://r4ds.had.co.nz/) by Hadley Wickham & Garrett Grolemund
+- [Text Mining with R](https://www.tidytextmining.com/) by Julia Silge & David Robinson (authors of the `tidytext` package)
+
+### Training
+
+And if you're in the London area and are looking to learn some R - Culture of Insight is currently running one-day R training workshops or in-house training days for companies and organisations.
+
+Head over to the [training page on our website](https://cultureofinsight.com/training/) to find out more and get in touch if you're interested.
+
+_fin._
+
+[_Paul Campbell_](https://twitter.com/paulcampbell91)
 
