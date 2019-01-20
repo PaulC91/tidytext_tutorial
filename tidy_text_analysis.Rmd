@@ -16,7 +16,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(tidytext)
-library(feather)
+#library(feather)
 
 checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
   list(message = check_code, correct = TRUE, location = "append")
@@ -27,7 +27,8 @@ tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
 knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center",
                       max.print = 100, warning = FALSE, message = FALSE)
 
-hp_text <- read_feather("hp_text.feather")
+#hp_text <- read_feather("hp_text.feather")
+hp_text <- readRDS("hp_text.rds")
 
 data(stop_words)
 
