@@ -32,7 +32,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </script>
 
 
-<link rel="stylesheet" href="www/styles.css" type="text/css" />
+<link rel="stylesheet" href="www\styles.css" type="text/css" />
 
 </head>
 
@@ -50,14 +50,14 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div id="section-tidy-tools" class="section level3">
 <h3>Tidy Tools</h3>
 <p>One of the many great new packages to grace the R ecosystem in the last few years has been <code>tidytext</code> by Julia Silge &amp; David Robinson. It has allowed R users familiar with the <code>tidyverse</code> suite of packages to apply these ‘tidy tools’ to text data.</p>
-<p>If you’re not currently an R <code>tidyverse</code> user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a ‘tidy’ data analysis pipeline and how to intregate natural language data into this workflow using the tools provided by <code>tidytext</code>. It will also touch on using the <code>ggplot2</code> package to visualise the results of your analysis.</p>
+<p>If you’re not currently an R <code>tidyverse</code> user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a ‘tidy’ data analysis pipeline and how to integrate natural language data into this workflow using the tools provided by <code>tidytext</code>. It will also touch on using the <code>ggplot2</code> package to visualise the results of your analysis.</p>
 <p>So let’s get cracking…</p>
 </div>
 <div id="section-key-concept-the-pipe" class="section level3">
 <h3>Key concept: the pipe <code>%&gt;%</code></h3>
-<p>In R, we can use the <code>%&gt;%</code> operater to ‘pipe’ data from one function to another. Most functions in the <code>tidyverse</code> take a data frame as the first input and send out a modified version of that data frame as the ouput. The pipe does the job of taking the output of one function and sending into the first input of the next function.</p>
-<p>This means we can write code like the below, that starts with a data frame and ‘pipes’ it along a series of functions, each one recieving the output of the function above it, until we get the data into the shape we need it.</p>
-<p>It also allows you to write very readible code that can be read like a sentence with the pipe linking the pieces of the story together with a “and then…” conjunctive.</p>
+<p>In R, we can use the <code>%&gt;%</code> operate to ‘pipe’ data from one function to another. Most functions in the <code>tidyverse</code> take a data frame as the first input and send out a modified version of that data frame as the output. The pipe does the job of taking the output of one function and sending into the first input of the next function.</p>
+<p>This means we can write code like the below, that starts with a data frame and ‘pipes’ it along a series of functions, each one receiving the output of the function above it, until we get the data into the shape we need it.</p>
+<p>It also allows you to write very readable code that can be read like a sentence with the pipe linking the pieces of the story together with a “and then…” conjunctive.</p>
 <pre class="r"><code>data_set %&gt;% 
   do_this_thing() %&gt;% 
   now_this_thing() %&gt;% 
@@ -71,7 +71,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>So run the code chunk below to have a look at what we’ve got…</p>
 <div class="tutorial-exercise" data-label="hp" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_text</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <p>Because this is a special type of data frame known as a ‘tibble’, we get a useful print out of the data telling us how many rows and columns we have, the type of data in each column (<code>&lt;fct&gt;</code>, <code>&lt;int&gt;</code>, <code>&lt;chr&gt;</code>), and a sample of the first 10 rows of data.</p>
 <p>We can see our data has <code>book</code>, <code>chapter</code>, and <code>text</code> columns. Our first task is to tidy the data to prepare it for analysis…</p>
@@ -89,7 +89,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div class="tutorial-exercise" data-label="hp-unnest" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_text %&gt;% 
   ___(output = ___, input = ___) </code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-unnest-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_text %&gt;% 
@@ -126,18 +126,18 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 ## 10 after       SMART  
 ## # ... with 1,139 more rows</code></pre>
 <p>We can remove stop words with an <code>anti_join()</code>. This is known as a filtering join operation that works by removing any words in our data set that also appear in the stop words data set.</p>
-<div class="figure" style="text-align: center">
+<div class="figure" style="text-align: centre">
 <img src="www/anti-join.gif" alt="animation by Garrick Aden-Buie @grrrck" width="70%" />
 <p class="caption">
 animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 </p>
 </div>
-<p>Fill out the blanks with the name of the function and the name of the data set containing stop words to filter out any stop words in the Harry Potter data. The <code>by = &quot;word&quot;</code> argument tells the join function that we would like it to anti-join on the <code>word</code> column in each data set.</p>
+<p>Fill out the blanks with the name of the function and the name of the data set containing stop words to filter out any stop words in the Harry Potter data. The <code>by = "word"</code> argument tells the join function that we would like it to anti-join on the <code>word</code> column in each data set.</p>
 <div class="tutorial-exercise" data-label="hp-anti-join" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_text %&gt;% 
   unnest_tokens(output = word, input = text) %&gt;% 
   ___(___, by = &quot;word&quot;)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-anti-join-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_text %&gt;% 
@@ -165,11 +165,11 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 ## # ... with 409,328 more rows</code></pre>
 <div id="section-word-counts" class="section level3">
 <h3>Word Counts</h3>
-<p>Use the <code>count()</code> function passing the <code>word</code> column as the first argument to count the occurances of each unique word in the data. Add a <code>sort = TRUE</code> argument to bring the most common words to the top.</p>
+<p>Use the <code>count()</code> function passing the <code>word</code> column as the first argument to count the occurrences of each unique word in the data. Add a <code>sort = TRUE</code> argument to bring the most common words to the top.</p>
 <div class="tutorial-exercise" data-label="hp-count" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
   count(___, sort = ___)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-count-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
@@ -182,7 +182,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 <div class="tutorial-exercise" data-label="hp-count-book" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
   count(___, word, sort = TRUE)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-count-book-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
@@ -205,7 +205,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 <pre class="text"><code>hp_tidy %&gt;% 
   ___(___ %in% ___) %&gt;% 
   count(word, sort = TRUE)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-count-no-names-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
@@ -270,7 +270,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 <h3>Sentiment analysis using <code>inner_join()</code></h3>
 <p>With data in a tidy format, sentiment analysis can be done as an inner join. This is another of the great successes of viewing text mining as a tidy data analysis task; much as removing stop words is an anti-join operation, performing sentiment analysis is an inner-join operation.</p>
 <p>Inner-joining a lexicon to our data will reduce the data to only words that have a match in the lexicon and then join on the the sentiment column to the data set.</p>
-<div class="figure" style="text-align: center">
+<div class="figure" style="text-align: centre">
 <img src="www/inner-join.gif" alt="animation by Garrick Aden-Buie @grrrck" width="70%" />
 <p class="caption">
 animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
@@ -280,7 +280,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 <div class="tutorial-exercise" data-label="hp-inner-join-bing" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
   ___(get_sentiments(&quot;___&quot;))</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"100%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"100%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-inner-join-bing-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
@@ -292,7 +292,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 <p>Once we have joined the positive/negative sentiments from the bing lexicon to our data, we can use <code>group_by()</code>, <code>summarise()</code> and <code>mutate()</code> to calculate the proportions in each book.</p>
 <ul>
 <li>First group the data by the <code>book</code> and <code>sentiment</code> columns</li>
-<li>Then use the <code>n()</code> function with summarise to count the occurances of each group</li>
+<li>Then use the <code>n()</code> function with summarise to count the occurrences of each group</li>
 <li>Finally we use <code>n / sum(n)</code> with <code>mutate()</code> to get the proportions and then <code>ungroup()</code></li>
 </ul>
 <div class="tutorial-exercise" data-label="hp-sent-props" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
@@ -302,7 +302,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
   summarise(n = ___) %&gt;% 
   mutate(prop = n / sum(n)) %&gt;% 
   ungroup()</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-sent-props-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
@@ -323,7 +323,7 @@ animation by Garrick Aden-Buie <span class="citation">@grrrck</span>
 </div>
 <div id="section-visualise-the-results-with-ggplot2" class="section level3">
 <h3>Visualise the results with <code>ggplot2</code></h3>
-<div class="figure" style="text-align: center">
+<div class="figure" style="text-align: centre">
 <img src="https://raw.githubusercontent.com/allisonhorst/stats-illustrations/master/rstats-artwork/ggplot2_masterpiece.png" alt="illustration by Allison Horst @allison_horst" width="70%" />
 <p class="caption">
 illustration by Allison Horst <span class="citation">@allison_horst</span>
@@ -332,7 +332,7 @@ illustration by Allison Horst <span class="citation">@allison_horst</span>
 <p>Once we’ve done some analysis, it’s good idea to visualise the results in a chart. We can use the <code>ggplot2</code> package from the tidyverse to do this.</p>
 <p>We won’t have time to cover ggplot2 at great length in this tutorial, but it’s widely regarded as the best chart programming library in the world with near endless visualisation options made possible by the possibility of iteratively adding layers of data.</p>
 <p>Combining visualisation and your data wrangling/analysis into a single scripted process is also a very powerful concept that can improve the quality and reproducibility of your data reporting.</p>
-<p>Below is a basic ggplot setup. Note that each line is linked with a <code>+</code> rather than a <code>%&gt;%</code>.</p>
+<p>Below is a basic ggplot set-up. Note that each line is linked with a <code>+</code> rather than a <code>%&gt;%</code>.</p>
 <p>The initial <code>ggplot()</code> function takes a data argument as well as an aesthetics function <code>aes()</code> in which you map columns of your data to coordinates, shapes or colours on the chart.</p>
 <p>In this instance, we then add a <code>geom_col</code> with position set to stack (stacked-bar chart), flip the axis to make the book names more readable then add a title to the chart.</p>
 <p>Fill in the blanks to put the <code>book</code> column on the x-axis, <code>prop</code> column on the y-axis and map the <code>sentiment</code> colour to the colour <code>fill</code>. Finally give your chart an appropriate title and run the code to see what we get!</p>
@@ -341,7 +341,7 @@ illustration by Allison Horst <span class="citation">@allison_horst</span>
   geom_col(position = &quot;stack&quot;) +
   coord_flip() +
   labs(title = &quot;Give your chart a title here!&quot;, x = NULL, y = NULL)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.setup":"prepare-hp-sent-props-viz","exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.setup":"prepare-hp-sent-props-viz","exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-sent-props-viz-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>ggplot(data = hp_props, aes(x = book, y = prop, fill = sentiment)) +
@@ -354,12 +354,12 @@ illustration by Allison Horst <span class="citation">@allison_horst</span>
 <h3>Challenge!</h3>
 <p>Starting with the <code>hp_tidy</code> data set. Can you:</p>
 <ol style="list-style-type: decimal">
-<li><code>inner_join()</code> the AFINN sentiment lexicon (<code>get_sentiments(&quot;afinn&quot;)</code>)</li>
+<li><code>inner_join()</code> the AFINN sentiment lexicon (<code>get_sentiments("afinn")</code>)</li>
 <li>Calculate the sentiment <code>score</code> of each chapter in each book</li>
 </ol>
 <div class="tutorial-exercise" data-label="hp-sent-affin" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% </code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-sent-affin-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>hp_tidy %&gt;% 
@@ -385,7 +385,7 @@ illustration by Allison Horst <span class="citation">@allison_horst</span>
   facet_wrap(~___, ncol = 1) +
   geom_col(show.legend = FALSE) +
   labs(title = &quot;Add your title here...&quot;, x = &quot;___&quot;, y = &quot;___&quot;)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":10,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.setup":"prepare-hp-scores-viz","exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":10,"fig.retina":2,"fig.align":"centre","fig.keep":"high","fig.show":"asis","out.width":"90%","warning":false,"error":false,"message":false,"exercise.df_print":"default","exercise.timelimit":60,"exercise.setup":"prepare-hp-scores-viz","exercise.checker":["function (label, user_code, check_code, envir_result, evaluate_result, ","    ...) ","{","    list(message = check_code, correct = TRUE, location = \"append\")","}"]}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="hp-scores-viz-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>ggplot(data = hp_scores, aes(x = chapter, y = score, fill = score &gt; 0)) +
@@ -397,7 +397,7 @@ illustration by Allison Horst <span class="citation">@allison_horst</span>
 <p>After you have a chart, try modifying some of the elements…</p>
 <ul>
 <li>What does changing the <code>ncol =</code> argument in the <code>facet_wrap</code> function do?</li>
-<li>Add a <code>scales = &quot;free_x&quot;</code> argument inside <code>facet_wrap()</code>. What has changed?</li>
+<li>Add a <code>scales = "free_x"</code> argument inside <code>facet_wrap()</code>. What has changed?</li>
 <li>Try adding another line (remember to use the <code>+</code>) to use a different chart theme… <code>theme_light()</code> perhaps?</li>
 </ul>
 </div>
@@ -449,7 +449,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(tidytext)
-library(feather)
+#library(feather)
 
 checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
   list(message = check_code, correct = TRUE, location = "append")
@@ -457,10 +457,11 @@ checker <- function(label, user_code, check_code, envir_result, evaluate_result,
 
 tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
 
-knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center",
+knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "centre",
                       max.print = 100, warning = FALSE, message = FALSE)
 
-hp_text <- read_feather("hp_text.feather")
+#hp_text <- read_feather("hp_text.feather")
+hp_text <- readRDS("hp_text.rds")
 
 data(stop_words)
 
