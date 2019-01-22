@@ -24,7 +24,7 @@ checker <- function(label, user_code, check_code, envir_result, evaluate_result,
 
 tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
 
-knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "center",
+knitr::opts_chunk$set(echo = FALSE, out.width = "90%", fig.align = "centre",
                       max.print = 100, warning = FALSE, message = FALSE)
 
 #hp_text <- read_feather("hp_text.feather")
@@ -338,7 +338,7 @@ We won't have time to cover ggplot2 at great length in this tutorial, but it's w
 
 Combining visualisation and your data wrangling/analysis into a single scripted process is also a very powerful concept that can improve the quality and reproducibility of your data reporting.
 
-Below is a basic ggplot setup. Note that each line is linked with a `+` rather than a `%>%`.
+Below is a basic ggplot set-up. Note that each line is linked with a `+` rather than a `%>%`.
 
 The initial `ggplot()` function takes a data argument as well as an aesthetics function `aes()` in which you map columns of your data to coordinates, shapes or colours on the chart.
 
