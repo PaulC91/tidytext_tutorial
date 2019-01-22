@@ -71,17 +71,17 @@ hp_characters <- c("Harry",
 
 One of the many great new packages to grace the R ecosystem in the last few years has been `tidytext` by Julia Silge & David Robinson. It has allowed R users familiar with the `tidyverse` suite of packages to apply these 'tidy tools' to text data.
 
-If you're not currently an R `tidyverse` user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a 'tidy' data analysis pipeline and how to intregate natural language data into this workflow using the tools provided by `tidytext`. It will also touch on using the `ggplot2` package to visualise the results of your analysis.
+If you're not currently an R `tidyverse` user fear not! This tutorial has been designed with beginners in mind and will introduce you the fundamentals of a 'tidy' data analysis pipeline and how to integrate natural language data into this workflow using the tools provided by `tidytext`. It will also touch on using the `ggplot2` package to visualise the results of your analysis.
 
 So let's get cracking...
 
 ### Key concept: the pipe `%>%`
 
-In R, we can use the `%>%` operater to 'pipe' data from one function to another. Most functions in the `tidyverse` take a data frame as the first input and send out a modified version of that data frame as the ouput. The pipe does the job of taking the output of one function and sending into the first input of the next function.
+In R, we can use the `%>%` operate to 'pipe' data from one function to another. Most functions in the `tidyverse` take a data frame as the first input and send out a modified version of that data frame as the output. The pipe does the job of taking the output of one function and sending into the first input of the next function.
 
-This means we can write code like the below, that starts with a data frame and 'pipes' it along a series of functions, each one recieving the output of the function above it, until we get the data into the shape we need it.
+This means we can write code like the below, that starts with a data frame and 'pipes' it along a series of functions, each one receiving the output of the function above it, until we get the data into the shape we need it.
 
-It also allows you to write very readible code that can be read like a sentence with the pipe linking the pieces of the story together with a "and then..." conjunctive.
+It also allows you to write very readable code that can be read like a sentence with the pipe linking the pieces of the story together with a "and then..." conjunctive.
 
 ```{r echo=TRUE, eval=FALSE}
 data_set %>% 
@@ -187,7 +187,7 @@ hp_tidy
 
 ### Word Counts
 
-Use the `count()` function passing the `word` column as the first argument to count the occurances of each unique word in the data. Add a `sort = TRUE` argument to bring the most common words to the top.
+Use the `count()` function passing the `word` column as the first argument to count the occurrences of each unique word in the data. Add a `sort = TRUE` argument to bring the most common words to the top.
 
 
 ```{r hp-count, exercise=TRUE, rows.print=20}
@@ -296,7 +296,7 @@ hp_tidy %>%
 Once we have joined the positive/negative sentiments from the bing lexicon to our data, we can use `group_by()`, `summarise()` and `mutate()` to calculate the proportions in each book.
 
 - First group the data by the `book` and `sentiment` columns
-- Then use the `n()` function with summarise to count the occurances of each group
+- Then use the `n()` function with summarise to count the occurrences of each group
 - Finally we use `n / sum(n)` with `mutate()` to get the proportions and then `ungroup()`
 
 ```{r hp-sent-props, exercise=TRUE}
